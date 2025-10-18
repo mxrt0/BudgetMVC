@@ -15,16 +15,17 @@ public class BudgetDbContext : DbContext
 
     }
 
-    DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
 
-    DbSet<Category> Categories { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Transaction>()
             .HasOne(t => t.Category)
             .WithMany(c => c.Transactions)
-            .HasForeignKey(t => t.CategoryId);
+            .HasForeignKey(t => t.CategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         base.OnModelCreating(modelBuilder);
     }

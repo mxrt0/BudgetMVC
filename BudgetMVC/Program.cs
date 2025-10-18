@@ -1,3 +1,6 @@
+using BudgetMVC.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace BudgetMVC
 {
     public class Program
@@ -8,6 +11,11 @@ namespace BudgetMVC
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDbContext<BudgetDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+            });
 
             var app = builder.Build();
 
