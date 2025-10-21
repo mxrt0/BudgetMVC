@@ -36,7 +36,7 @@ namespace BudgetMVC
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Transaction}/{action=Index}/{id?}");
+                pattern: "{controller=Transactions}/{action=Index}/{id?}");
 
             app.Run();
         }

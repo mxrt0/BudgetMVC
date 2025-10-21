@@ -20,3 +20,129 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+body {
+    background: linear-gradient(135deg, #e0f7fa, #c8f0f4);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+
+.form-card .card-header {
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+    background: linear-gradient(to right, #a8edea, #fed6e3);
+    color: #064451;
+    user-select: none;
+    -webkit-user-select: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+
+.table-card .card-header {
+    user-select: none;
+    -webkit-user-select: none;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+    background: linear-gradient(to right, #b3ffab, #12fff7);
+    color: #064451;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.form-container {
+    max-width: 550px;
+    margin: auto;
+}
+
+.btn {
+    transition: 0.3s;
+}
+
+.btn-gradient {
+    background: linear-gradient(to right, #a8edea, #12fff7);
+    border: none;
+    color: #064451;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-0.8px) scale(1.05);
+}
+
+table th, table td {
+    user-select: none;
+    -webkit-user-select: none;
+    vertical-align: middle !important;
+    color: #064451;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+td.description {
+    max-width: 200px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+table {
+    background-color: #f0fcff;
+    border-radius: 5px;
+}
+
+h1 {
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: 700;
+    color: #064451;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.form-label {
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: 500;
+    color: #064451;
+}
+
+.toast {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    position: fixed;
+    top: 40px;
+    left: 40px;
+    z-index: 1050;
+    background: linear-gradient(135deg, #00796B, #004D40);
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+    min-width: 250px;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.toast.show {
+    opacity: 1;
+    transition: opacity 0.5s ease-in;
+}
+
+.toast.hide {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+    pointer-events: none;
+}
+
+.toast .btn-close {
+    line-height: 1;
+    padding: 0;
+}
+
