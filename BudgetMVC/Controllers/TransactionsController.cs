@@ -27,7 +27,7 @@ public class TransactionsController : Controller
         return View(vm);
     }
 
-    public IActionResult Search(string q)
+    public IActionResult Search(string q, string categoryId)
     {
         var query = _context.Transactions.Include(t => t.Category).AsQueryable();
 
@@ -35,7 +35,11 @@ public class TransactionsController : Controller
         {
             query = query.Where(t => EF.Functions.Like(t.Description, $"%{q}%"));
         }
-        else
+        if (!string.IsNullOrWhiteSpace(categoryId))
+        {
+            query = query.Where(t => t.CategoryId == int.Parse(categoryId));
+        }
+        if (string.IsNullOrWhiteSpace(q) && string.IsNullOrWhiteSpace(categoryId))
         {
             return RedirectToAction("Index");
         }

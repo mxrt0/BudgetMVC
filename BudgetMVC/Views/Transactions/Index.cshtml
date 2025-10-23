@@ -21,11 +21,26 @@
     <div id="modalContainer"></div>
     <div class="search-container">
         <form asp-action="Search" method="get" class="search-form">
+            
             <input type="text"
                    name="q"
                    value="@Context.Request.Query["q"].ToString()"
                    class="search-input"
                    placeholder="Search transactions by description..." />
+            <select name="categoryId" class="search-select">
+                <option value="">All Categories</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    @if (Context.Request.Query["categoryId"] == cat.Value)
+                    {
+                        <option value="@cat.Value" selected>@cat.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@cat.Value">@cat.Text</option>
+                    }
+                }
+            </select>
             <button type="submit" class="search-btn">Search</button>
         </form>
     </div>
