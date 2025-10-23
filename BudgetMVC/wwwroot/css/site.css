@@ -44,6 +44,16 @@ body {
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
+.table, .table-light {
+    background-color: #eef3f8;
+}
+
+.table thead th {
+    background-color: #e3ebf5; 
+    color: #1a1a1a; 
+    font-weight: 600;
+    border-bottom: 2px solid #d1dae6;
+}
 
 .table-card .card-header {
     user-select: none;
@@ -63,6 +73,7 @@ body {
 
 .btn {
     transition: 0.3s;
+    border-radius: 6px;
 }
 
 .btn-gradient {
@@ -70,6 +81,7 @@ body {
     border: none;
     color: #064451;
     font-weight: 500;
+    border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
@@ -145,4 +157,53 @@ h1 {
     line-height: 1;
     padding: 0;
 }
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin: 0.7rem 0;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 500px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.search-form:focus-within {
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.4);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+    background: transparent;
+}
+
+.search-btn {
+    background-color: #0078ff;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: 0 500px 500px 0;
+}
+
+.search-btn:hover {
+    background-color: #005fcc;
+}
+
 

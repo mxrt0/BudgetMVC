@@ -19,6 +19,17 @@
 
     @await Html.PartialAsync("_CreateTransaction", Model)
     <div id="modalContainer"></div>
+    <div class="search-container">
+        <form asp-action="Search" method="get" class="search-form">
+            <input type="text"
+                   name="q"
+                   value="@Context.Request.Query["q"].ToString()"
+                   class="search-input"
+                   placeholder="Search transactions by description..." />
+            <button type="submit" class="search-btn">Search</button>
+        </form>
+    </div>
+
     <div class="card table-card">
         <div class="card-header">
             All Transactions
@@ -43,7 +54,7 @@
                             CultureInfo culture = t.Currency switch
                             {
                                 "GBP" => new CultureInfo("en-GB"),
-                                "EUR" => new CultureInfo("nl-NL"),
+                                "EUR" => new CultureInfo("en-IE"),
                                 _ => new CultureInfo("en-US"),
                             };
 
@@ -60,10 +71,16 @@
                             </tr>
                         }
                     }
+                    else if (string.IsNullOrWhiteSpace(Context.Request.Query["q"]))
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-3 text-muted">No transactions found.</td>
+                        </tr>
+                    }
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-3">No transactions found.</td>
+                            <td colspan="6" class="text-center py-3 text-muted">No matching transactions found.</td>
                         </tr>
                     }
                 </tbody>

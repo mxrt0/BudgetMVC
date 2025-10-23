@@ -1,8 +1,8 @@
 ﻿@model EditTransactionViewModel
 @{
-    CultureInfo culture = Model.CurrentTransaction.Currency switch
+    CultureInfo culture = Model.CurrentTransaction?.Currency switch
     {
-        "EUR" => new CultureInfo("nl-NL"),
+        "EUR" => new CultureInfo("en-IE"),
         "GBP" => new CultureInfo("en-GB"),
         _ => new CultureInfo("en-US")
     };

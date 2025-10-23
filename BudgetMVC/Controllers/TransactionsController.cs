@@ -27,6 +27,32 @@ public class TransactionsController : Controller
         return View(vm);
     }
 
+    public IActionResult Search(string q)
+    {
+        var query = _context.Transactions.Include(t => t.Category).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            query = query.Where(t => EF.Functions.Like(t.Description, $"%{q}%"));
+        }
+        else
+        {
+            return RedirectToAction("Index");
+        }
+
+        var matches = query.ToList();
+        var vm = new TransactionsViewModel
+        {
+            NewTransaction = new Transaction(),
+            Transactions = matches,
+            Categories = new SelectList(_context.Categories, "Id", "Name"),
+            Currencies = new SelectList(_currencies, "USD")
+        };
+
+        return View("Index", vm);
+    }
+
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind(Prefix = "NewTransaction")] Transaction transaction, string selectedCurrency)
@@ -115,7 +141,7 @@ public class TransactionsController : Controller
 
     public IActionResult DeleteModalPartial(int id)
     {
-        var record = _context.Transactions.FirstOrDefault(r => r.Id == id);
+        var record = _context.Transactions.Include(t => t.Category).FirstOrDefault(r => r.Id == id);
         if (record is null)
         {
             return NotFound();
