@@ -4,6 +4,7 @@ using BudgetMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace BudgetMVC.Controllers;
 
@@ -27,7 +28,7 @@ public class TransactionsController : Controller
         return View(vm);
     }
 
-    public IActionResult Search(string q, string categoryId)
+    public IActionResult Search(string q, string categoryId, string date)
     {
         var query = _context.Transactions.Include(t => t.Category).AsQueryable();
 
@@ -39,7 +40,12 @@ public class TransactionsController : Controller
         {
             query = query.Where(t => t.CategoryId == int.Parse(categoryId));
         }
-        if (string.IsNullOrWhiteSpace(q) && string.IsNullOrWhiteSpace(categoryId))
+        if (!string.IsNullOrWhiteSpace(date) &&
+          DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+        {
+            query = query.Where(t => t.Date.Date == parsedDate.Date);
+        }
+        if (string.IsNullOrWhiteSpace(q) && string.IsNullOrWhiteSpace(categoryId) && date is null)
         {
             return RedirectToAction("Index");
         }

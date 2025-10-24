@@ -41,6 +41,10 @@
                     }
                 }
             </select>
+            <input type="date"
+                   name="date"
+                   value="@Context.Request.Query["date"].ToString()"
+                   class="search-date" />
             <button type="submit" class="search-btn">Search</button>
         </form>
     </div>
@@ -86,7 +90,8 @@
                             </tr>
                         }
                     }
-                    else if (string.IsNullOrWhiteSpace(Context.Request.Query["q"]))
+                    else if (string.IsNullOrWhiteSpace(Context.Request.Query["q"]) && string.IsNullOrWhiteSpace(Context.Request.Query["categoryId"])
+                    && string.IsNullOrWhiteSpace(Context.Request.Query["date"]))
                     {
                         <tr>
                             <td colspan="6" class="text-center py-3 text-muted">No transactions found.</td>

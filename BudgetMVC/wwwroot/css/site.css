@@ -168,7 +168,7 @@ h1 {
     display: flex;
     align-items: stretch;
     width: 100%;
-    max-width: 700px;
+    max-width: 900px;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 999px;
@@ -236,5 +236,31 @@ h1 {
 .search-btn:hover {
     background-color: #005fcc;
 }
+
+.search-date {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    margin: 0.3rem 0 0.3rem 0.3rem;
+    border-radius: 100px;
+    border: 1px solid #e5e5e5;
+    color: #444;
+    transition: all 0.2s ease;
+    appearance: none;
+}
+
+.search-date:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.search-date:focus {
+    border-color: #0078ff;
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3);
+}
+
 
 
