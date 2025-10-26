@@ -262,5 +262,46 @@ h1 {
     box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3);
 }
 
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+}
+
+.page-item {
+    display: inline-block;
+}
+
+.page-link {
+    display: block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    color: #333;
+    background-color: #fff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    cursor: default;
+}
+
+
 
 

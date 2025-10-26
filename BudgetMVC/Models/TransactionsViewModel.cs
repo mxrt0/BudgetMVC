@@ -10,4 +10,7 @@ public class TransactionsViewModel
     public SelectList Categories { get; set; }
     public SelectList Currencies { get; set; }
     public string? SelectedCurrency { get; set; }
+
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
 }

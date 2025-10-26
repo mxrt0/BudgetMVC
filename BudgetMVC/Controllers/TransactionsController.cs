@@ -12,23 +12,36 @@ public class TransactionsController : Controller
 {
     private readonly BudgetDbContext _context;
     private readonly string[] _currencies = { "USD", "EUR", "GBP" };
+    private const int PageSize = 20;
     public TransactionsController(BudgetDbContext context)
     {
         _context = context;
     }
-    public IActionResult Index()
+    public IActionResult Index(int page = 1)
     {
+        var totalCount = _context.Transactions.Count();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+
+        var transactions = _context.Transactions
+            .Include(t => t.Category)
+            .OrderByDescending(t => t.Date)
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
+
         var vm = new TransactionsViewModel
         {
             NewTransaction = new Transaction(),
-            Transactions = _context.Transactions.Include(t => t.Category).ToList(),
+            Transactions = transactions,
             Categories = new SelectList(_context.Categories, "Id", "Name"),
-            Currencies = new SelectList(_currencies, "USD")
+            Currencies = new SelectList(_currencies, "USD"),
+            CurrentPage = page,
+            TotalPages = totalPages
         };
         return View(vm);
     }
 
-    public IActionResult Search(string q, string categoryId, string date)
+    public IActionResult Search(string q, string categoryId, string date, int page = 1)
     {
         var query = _context.Transactions.Include(t => t.Category).AsQueryable();
 
@@ -50,13 +63,23 @@ public class TransactionsController : Controller
             return RedirectToAction("Index");
         }
 
-        var matches = query.ToList();
+        var totalCount = query.Count();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+
+        var matches = query
+            .OrderByDescending(t => t.Date)
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
+
         var vm = new TransactionsViewModel
         {
             NewTransaction = new Transaction(),
             Transactions = matches,
             Categories = new SelectList(_context.Categories, "Id", "Name"),
-            Currencies = new SelectList(_currencies, "USD")
+            Currencies = new SelectList(_currencies, "USD"),
+            CurrentPage = page,
+            TotalPages = totalPages
         };
 
         return View("Index", vm);
