@@ -25,6 +25,9 @@
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
+            <div id="modal-error">
+                @await Html.PartialAsync("_ErrorPartial")
+            </div>
         </div>
     </div>
 </div>

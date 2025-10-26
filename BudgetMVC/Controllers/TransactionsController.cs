@@ -13,184 +13,243 @@ public class TransactionsController : Controller
     private readonly BudgetDbContext _context;
     private readonly string[] _currencies = { "USD", "EUR", "GBP" };
     private const int PageSize = 20;
+
     public TransactionsController(BudgetDbContext context)
     {
         _context = context;
     }
+
+    // Utility fallback
+    private TransactionsViewModel SafeViewModel(
+        List<Transaction>? transactions = null,
+        int currentPage = 1,
+        int totalPages = 1)
+    {
+        var categories = new List<Category>();
+        try
+        {
+            categories = _context.Categories.ToList();
+        }
+        catch
+        {
+            // DB might be missing — ignore gracefully
+        }
+
+        return new TransactionsViewModel
+        {
+            NewTransaction = new Transaction(),
+            Transactions = transactions ?? new List<Transaction>(),
+            Categories = new SelectList(categories, "Id", "Name"),
+            Currencies = new SelectList(_currencies, "USD"),
+            CurrentPage = currentPage,
+            TotalPages = totalPages
+        };
+    }
+
     public IActionResult Index(int page = 1)
     {
-        var totalCount = _context.Transactions.Count();
-        var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
-
-        var transactions = _context.Transactions
-            .Include(t => t.Category)
-            .OrderByDescending(t => t.Date)
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
-            .ToList();
-
-        var vm = new TransactionsViewModel
+        try
         {
-            NewTransaction = new Transaction(),
-            Transactions = transactions,
-            Categories = new SelectList(_context.Categories, "Id", "Name"),
-            Currencies = new SelectList(_currencies, "USD"),
-            CurrentPage = page,
-            TotalPages = totalPages
-        };
-        return View(vm);
+            if (!_context.Database.CanConnect())
+            {
+                TempData["ErrorMessage"] = "Database unavailable.";
+                return View(SafeViewModel());
+            }
+
+            var totalCount = _context.Transactions.Count();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
+
+            var transactions = _context.Transactions
+                .Include(t => t.Category)
+                .OrderByDescending(t => t.Date)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+
+            return View(SafeViewModel(transactions, page, totalPages));
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Unexpected error: {ex.Message}";
+            return View(SafeViewModel());
+        }
     }
 
-    public IActionResult Search(string q, string categoryId, string date, int page = 1)
+    public IActionResult Search(string? q, string? categoryId, string? date, int page = 1)
     {
-        var query = _context.Transactions.Include(t => t.Category).AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(q))
+        try
         {
-            query = query.Where(t => EF.Functions.Like(t.Description, $"%{q}%"));
+            if (!_context.Database.CanConnect())
+            {
+                TempData["ErrorMessage"] = "Database unavailable.";
+                return View("Index", SafeViewModel());
+            }
+
+            var query = _context.Transactions.Include(t => t.Category).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+                query = query.Where(t => EF.Functions.Like(t.Description, $"%{q}%"));
+
+            if (int.TryParse(categoryId, out var parsedCat))
+                query = query.Where(t => t.CategoryId == parsedCat);
+
+            if (!string.IsNullOrWhiteSpace(date)
+                && DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+                query = query.Where(t => t.Date.Date == parsedDate.Date);
+
+            if (string.IsNullOrWhiteSpace(q) && string.IsNullOrWhiteSpace(categoryId) && date is null)
+                return RedirectToAction(nameof(Index));
+
+            var totalCount = query.Count();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
+
+            var matches = query
+                .OrderByDescending(t => t.Date)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+
+            return View("Index", SafeViewModel(matches, page, totalPages));
         }
-        if (!string.IsNullOrWhiteSpace(categoryId))
+        catch (Exception ex)
         {
-            query = query.Where(t => t.CategoryId == int.Parse(categoryId));
+            TempData["ErrorMessage"] = $"Search error: {ex.Message}";
+            return View("Index", SafeViewModel());
         }
-        if (!string.IsNullOrWhiteSpace(date) &&
-          DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
-        {
-            query = query.Where(t => t.Date.Date == parsedDate.Date);
-        }
-        if (string.IsNullOrWhiteSpace(q) && string.IsNullOrWhiteSpace(categoryId) && date is null)
-        {
-            return RedirectToAction("Index");
-        }
-
-        var totalCount = query.Count();
-        var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
-
-        var matches = query
-            .OrderByDescending(t => t.Date)
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
-            .ToList();
-
-        var vm = new TransactionsViewModel
-        {
-            NewTransaction = new Transaction(),
-            Transactions = matches,
-            Categories = new SelectList(_context.Categories, "Id", "Name"),
-            Currencies = new SelectList(_currencies, "USD"),
-            CurrentPage = page,
-            TotalPages = totalPages
-        };
-
-        return View("Index", vm);
     }
-
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind(Prefix = "NewTransaction")] Transaction transaction, string selectedCurrency)
+    public async Task<IActionResult> Create([Bind(Prefix = "NewTransaction")] Transaction transaction, string? selectedCurrency)
     {
-
-        if (!ModelState.IsValid)
+        try
         {
-            var vm = new TransactionsViewModel
-            {
-                NewTransaction = new Transaction(),
-                Transactions = _context.Transactions.Include(t => t.Category).ToList(),
-                Categories = new SelectList(_context.Categories, "Id", "Name"),
-                Currencies = new SelectList(_currencies, "USD")
-            };
-            return View("Index", vm);
-        }
-        if (selectedCurrency is not null)
-        {
-            transaction.Currency = selectedCurrency;
-        }
+            if (!ModelState.IsValid)
+                return View("Index", SafeViewModel());
 
-        _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
-        TempData["SuccessMessage"] = "Transaction added successfully!";
-        return RedirectToAction("Index");
+            transaction.Currency = selectedCurrency ?? "USD";
+
+            _context.Transactions.Add(transaction);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Transaction added successfully!";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Failed to create transaction: {ex.Message}";
+            return View("Index", SafeViewModel());
+        }
     }
 
     [HttpGet]
     public IActionResult EditModalPartial(int id)
     {
-        var record = _context.Transactions.FirstOrDefault(r => r.Id == id);
-        if (record is null)
+        try
         {
-            return NotFound();
-        }
-        var vm = new EditTransactionViewModel
-        {
-            NewTransaction = new Transaction
-            {
-                Date = record.Date,
-                CategoryId = record.CategoryId,
-                Amount = record.Amount,
-                Description = record.Description,
-                Currency = record.Currency
-            },
-            CurrentTransaction = record,
-            Categories = new SelectList(_context.Categories, "Id", "Name", record.CategoryId),
-            Currencies = new SelectList(_currencies, record.Currency)
-        };
-        return PartialView("_EditTransaction", vm);
+            var record = _context.Transactions.FirstOrDefault(r => r.Id == id);
+            if (record is null) return NotFound();
 
+            var vm = new EditTransactionViewModel
+            {
+                NewTransaction = new Transaction
+                {
+                    Date = record.Date,
+                    CategoryId = record.CategoryId,
+                    Amount = record.Amount,
+                    Description = record.Description,
+                    Currency = record.Currency
+                },
+                CurrentTransaction = record,
+                Categories = new SelectList(_context.Categories, "Id", "Name", record.CategoryId),
+                Currencies = new SelectList(_currencies, record.Currency)
+            };
+            return PartialView("_EditTransaction", vm);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Unable to open edit modal: {ex.Message}";
+            return PartialView("_ErrorPartial");
+        }
     }
+
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, [Bind(Prefix = "NewTransaction")] Transaction newTransaction, string selectedCurrency)
+    public async Task<IActionResult> Edit(int id, [Bind(Prefix = "NewTransaction")] Transaction newTransaction, string? selectedCurrency)
     {
-        Transaction? recordToUpdate = _context.Transactions.FirstOrDefault(r => r.Id == id);
-        if (recordToUpdate is null)
+        try
         {
-            return NotFound();
-        }
+            var recordToUpdate = _context.Transactions.FirstOrDefault(r => r.Id == id);
+            if (recordToUpdate is null) return NotFound();
 
-        if (ModelState.IsValid)
-        {
-            recordToUpdate.Date = newTransaction.Date;
-            recordToUpdate.Currency = selectedCurrency;
-            recordToUpdate.Amount = newTransaction.Amount;
-            recordToUpdate.Description = newTransaction.Description;
-            await _context.SaveChangesAsync();
-
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if (ModelState.IsValid)
             {
-                return Json(new { success = true });
+                recordToUpdate.Date = newTransaction.Date;
+                recordToUpdate.Currency = selectedCurrency ?? recordToUpdate.Currency;
+                recordToUpdate.Amount = newTransaction.Amount;
+                recordToUpdate.Description = newTransaction.Description;
+
+                await _context.SaveChangesAsync();
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = true });
+
+                TempData["SuccessMessage"] = $"Successfully edited transaction #{recordToUpdate.Id}!";
+                return RedirectToAction(nameof(Index));
             }
-            TempData["SuccessMessage"] = $"Successfully edited transaction #{recordToUpdate.Id} !";
-            return RedirectToAction("Index");
+
+            return PartialView("_EditTransaction", new EditTransactionViewModel
+            {
+                NewTransaction = newTransaction,
+                CurrentTransaction = recordToUpdate,
+                Categories = new SelectList(_context.Categories, "Id", "Name", newTransaction.CategoryId),
+                Currencies = new SelectList(_currencies, newTransaction.Currency)
+            });
         }
-        var vm = new EditTransactionViewModel
+        catch (Exception ex)
         {
-            NewTransaction = newTransaction,
-            CurrentTransaction = recordToUpdate,
-            Categories = new SelectList(_context.Categories, "Id", "Name", newTransaction?.Category),
-            Currencies = new SelectList(_currencies, newTransaction?.Currency)
-        };
-        return PartialView("_EditTransaction", vm);
+            TempData["ErrorMessage"] = $"Edit failed: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     public IActionResult DeleteModalPartial(int id)
     {
-        var record = _context.Transactions.Include(t => t.Category).FirstOrDefault(r => r.Id == id);
-        if (record is null)
+        try
         {
-            return NotFound();
+            var record = _context.Transactions.Include(t => t.Category).FirstOrDefault(r => r.Id == id);
+            if (record is null) return NotFound();
+            return PartialView("_DeleteTransaction", record);
         }
-        return PartialView("_DeleteTransaction", record);
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error loading delete modal: {ex.Message}";
+            return PartialView("_ErrorPartial");
+        }
     }
+
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
-        var transaction = _context.Transactions.Find(id);
-        if (transaction is not null)
+        try
         {
-            _context.Transactions.Remove(transaction);
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = $"Succesfully deleted transaction #{transaction.Id} !";
+            var transaction = _context.Transactions.Find(id);
+            if (transaction is not null)
+            {
+                _context.Transactions.Remove(transaction);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Successfully deleted transaction #{transaction.Id}!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Transaction not found.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
-        return RedirectToAction("Index");
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Delete failed: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

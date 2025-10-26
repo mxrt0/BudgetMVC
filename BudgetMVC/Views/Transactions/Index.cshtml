@@ -18,6 +18,8 @@
     <h1 class="mb-5">Transaction Dashboard</h1>
 
     @await Html.PartialAsync("_CreateTransaction", Model)
+    @await Html.PartialAsync("_ErrorPartial")
+
     <div id="modalContainer"></div>
     <div class="search-container">
         <form asp-action="Search" method="get" class="search-form">
@@ -46,6 +48,7 @@
                    value="@Context.Request.Query["date"].ToString()"
                    class="search-date" />
             <button type="submit" class="search-btn">Search</button>
+            <button type="button" class="clear-btn" id="clearFiltersBtn">Clear Filters</button>
         </form>
     </div>
 
@@ -151,8 +154,28 @@
     }
 </div>
 
-<script>
+<script>    
     window.addEventListener('DOMContentLoaded', () => {
+        const searchForm = document.querySelector('.search-form');
+        const searchInput = searchForm.querySelector('.search-input');
+        const clearBtn = document.getElementById('clearFiltersBtn');
+
+        clearBtn.addEventListener('click', (e) => {
+         e.preventDefault();
+         e.stopPropagation();
+
+        searchForm.querySelectorAll('input, select').forEach(el => {
+        if (el.tagName.toLowerCase() === 'select') el.selectedIndex = 0;
+        else el.value = '';
+
+        });
+
+        searchForm.submit();
+    });
+        const valueLength = searchInput.value.length;
+        searchInput.focus();
+        searchInput.setSelectionRange(valueLength, valueLength);
+
         const message = sessionStorage.getItem('toastMessage');
         if (message) {
         showToast(message);
@@ -162,7 +185,14 @@
        if (toastBody && toastBody.textContent.trim() !== '') {
         showToast(toastBody.textContent);
     }
-        
+
+     let debounceTimeout;     
+     searchInput.addEventListener('input', () => {
+         clearTimeout(debounceTimeout);
+         debounceTimeout = setTimeout(() => {
+             searchForm.submit();
+         }, 300);
+     })
         document.querySelectorAll('.btn-danger').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
