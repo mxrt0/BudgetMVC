@@ -14,11 +14,10 @@
   </div>
 
 <div class="container py-5">
-
+    @await Html.PartialAsync("_ErrorPartial")
     <h1 class="mb-5">Transaction Dashboard</h1>
 
     @await Html.PartialAsync("_CreateTransaction", Model)
-    @await Html.PartialAsync("_ErrorPartial")
 
     <div id="modalContainer"></div>
     <div class="search-container">
@@ -80,12 +79,20 @@
                                 _ => new CultureInfo("en-US"),
                             };
 
-                            <tr>
+                            <tr class="@(t.IsRecurring ? "tr-recurring" : "")">
                                 <td>@t.Id</td>
                                 <td>@t.Category?.Name</td>
                                 <td>@t.Amount.ToString("C", culture)</td>
                                 <td>@t.Date.ToString("yyyy-MM-dd")</td>
-                                <td class="description">@t.Description</td>
+                                <td class="description">
+                                    @t.Description
+                                    @if (t.IsRecurring)
+                                    {
+                                        <span class="badge recurring-badge" title="Recurring transaction">
+                                            🔁 Recurring
+                                        </span>
+                                    }
+                                </td>
                                 <td>
                                     <a data-id="@t.Id" class="btn btn-sm me-1 btn-info">Edit</a>
                                     <a data-id="@t.Id" class="btn btn-sm btn-danger">Delete</a>

@@ -49,12 +49,12 @@ body {
     background-color: #eef3f8;
 }
 
-    .table thead th {
-        background-color: rgba(235, 255, 255, 0.7); /* soft, slightly translucent */
-        color: #333;
-        font-weight: 500;
-        border-bottom: 1px solid #ccc;
-    }
+.table thead th {
+    background-color: rgba(235, 255, 255, 0.7); /* soft, slightly translucent */
+    color: #333;
+    font-weight: 500;
+    border-bottom: 1px solid #ccc;
+}
 
 .table-card .card-header {
     user-select: none;
@@ -326,6 +326,66 @@ h1 {
     cursor: default;
 }
 
+/* Recurring row base styling */
+.tr-recurring {
+    background-color: rgba(230, 240, 255, 0.7); /* very light blue, soft */
+    font-style: italic; /* subtle visual cue */
+    font-weight: 600; /* slightly bolder */
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid;
+}
+.tr-recurring .btn {
+    font-style: normal;
+}
+
+    /* Left accent border for recurring */
+    .tr-recurring td:first-child {
+        border-left: 4px solid #12fff7; /* matches your gradient header */
+        padding-left: 0.5rem; /* small padding so text doesn't stick to border */
+    }
+
+    /* Hover effect for recurring rows */
+    .tr-recurring:hover {
+        background-color: rgba(240, 248, 255, 0.85); /* slightly darker on hover */
+        cursor: default;
+    }
+
+    /* Recurring badge */
+    .tr-recurring .badge-recurring {
+        background-color: #12fff7; /* accent color */
+        color: #fff;
+        font-size: 0.75rem;
+        padding: 0.2em 0.4em;
+        border-radius: 0.25rem;
+        margin-left: 0.3rem;
+    }
+
+    /* Optional: subtle shadow for recurring rows */
+    .tr-recurring td {
+        box-shadow: inset 0 0 0 0 transparent;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .tr-recurring:hover td {
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+    }
+
+.recurring-badge {
+    background-color: rgba(210, 225, 255, 0.9); /* Slightly darker than row bg */
+    color: #0d47a1; /* Deep blue for contrast */
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(180, 200, 255, 0.8);
+    border-radius: 12px;
+    padding: 0.3em 0.6em;
+    vertical-align: middle;
+    box-shadow: 0 0 3px rgba(150, 180, 255, 0.3);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.recurring-badge:hover {
+    transform: translateY(-0.8px);
+}
 
 
 

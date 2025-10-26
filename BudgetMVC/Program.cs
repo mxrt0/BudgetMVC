@@ -1,4 +1,5 @@
 using BudgetMVC.Data;
+using BudgetMVC.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BudgetMVC
@@ -15,6 +16,23 @@ namespace BudgetMVC
             builder.Services.AddDbContext<BudgetDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+            });
+
+            builder.Services.AddHostedService<RecurringTransactionService>();
+
+            builder.Services.AddSingleton<DbCache>(sp =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("Default");
+
+                return new DbCache(() =>
+                {
+                    var options = new DbContextOptionsBuilder<BudgetDbContext>()
+                        .UseSqlServer(connectionString)
+                        .Options;
+
+                    return new BudgetDbContext(options);
+                });
+
             });
 
             var app = builder.Build();

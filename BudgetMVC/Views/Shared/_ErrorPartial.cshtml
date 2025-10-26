@@ -4,9 +4,15 @@
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <div class="alert alert-danger mt-3">
+    <div class="alert alert-danger mt-3 text-center">
         <strong>Error:</strong> @errorMessage
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('form button').forEach(btn => btn.disabled = true);
+        });
+    </script>
 }
 
 

@@ -15,7 +15,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editForm" asp-action="Edit" asp-route-id="@Model.CurrentTransaction.Id" method="post" class="row g-3">
+                <form id="editForm" asp-action="Edit" asp-route-id="@Model.CurrentTransaction!.Id" method="post" class="row g-3">
                     <div class="col-12">
                         <label asp-for="NewTransaction.Date" class="form-label">Date</label>
                         <input asp-for="NewTransaction.Date" class="form-control" type="date" />
@@ -40,6 +40,53 @@
                         <input asp-for="NewTransaction.Description" class="form-control" value="@Model.CurrentTransaction.Description"/>
                         <span asp-validation-for="NewTransaction.Description" class="text-danger"></span>
                     </div>
+                     <div class="form-check d-flex align-items-center gap-2">
+                        @if (Model.CurrentTransaction.IsRecurring)
+                        {
+                            <input asp-for="NewTransaction.IsRecurring" class="form-check-input" type="checkbox" id="isRecurringCheckbox" checked/>
+                        }
+                        else
+                        {
+                            <input asp-for="NewTransaction.IsRecurring" class="form-check-input" type="checkbox" id="isRecurringCheckbox" />
+                        }
+
+                        <label class="form-check-label" for="isRecurringCheckbox">Recurring transaction</label>
+
+                            <select asp-for="NewTransaction.RecurrenceInterval" class="form-select" style="display:none; width: auto;" id="recurrenceFrequency">
+                            @if (string.Equals(Model.CurrentTransaction.RecurrenceInterval, "daily", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <option value="Daily" selected>Daily</option>
+                            }
+                            else
+                            {
+                                <option value="Daily">Daily</option>
+                            }
+                            @if (string.Equals(Model.CurrentTransaction.RecurrenceInterval, "weekly", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <option value="Weekly" selected>Weekly</option>
+                            }
+                            else
+                            {
+                                <option value="Weekly">Weekly</option>
+                            }
+                            @if (string.Equals(Model.CurrentTransaction.RecurrenceInterval, "monthly", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <option value="Monthly" selected>Monthly</option>
+                            }
+                            else
+                            {
+                                <option value="Monthly">Monthly</option>
+                            }
+                            @if (string.Equals(Model.CurrentTransaction.RecurrenceInterval, "monthly", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <option value="Yearly" selected>Yearly</option>
+                            }
+                            else
+                            {
+                                <option value="Yearly">Yearly</option>
+                            }                               
+                            </select>
+                     </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -53,3 +100,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const recurringCheckbox = document.getElementById('isRecurringCheckbox');
+        const recurrenceFrequency = document.getElementById('recurrenceFrequency');
+
+        if (!recurringCheckbox || !recurrenceFrequency) return;
+
+        // set initial state
+        recurrenceFrequency.style.display = recurringCheckbox.checked ? 'inline-block' : 'none';
+
+        recurringCheckbox.addEventListener('change', () => {
+            recurrenceFrequency.style.display = recurringCheckbox.checked ? 'inline-block' : 'none';
+        });
+    });
+</script>
+

@@ -1,6 +1,7 @@
 ﻿using BudgetMVC.Data;
 using BudgetMVC.Data.Models;
 using BudgetMVC.Models;
+using BudgetMVC.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +12,14 @@ namespace BudgetMVC.Controllers;
 public class TransactionsController : Controller
 {
     private readonly BudgetDbContext _context;
+    private readonly DbCache _cache;
     private readonly string[] _currencies = { "USD", "EUR", "GBP" };
     private const int PageSize = 20;
 
-    public TransactionsController(BudgetDbContext context)
+    public TransactionsController(BudgetDbContext context, DbCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     // Utility fallback
@@ -28,7 +31,7 @@ public class TransactionsController : Controller
         var categories = new List<Category>();
         try
         {
-            categories = _context.Categories.ToList();
+            categories = _cache.GetCategories().ToList();
         }
         catch
         {
@@ -55,13 +58,12 @@ public class TransactionsController : Controller
                 TempData["ErrorMessage"] = "Database unavailable.";
                 return View(SafeViewModel());
             }
-
-            var totalCount = _context.Transactions.Count();
+            var totalCount = _cache.GetTransactions().Count();
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
 
-            var transactions = _context.Transactions
-                .Include(t => t.Category)
-                .OrderByDescending(t => t.Date)
+            var transactions = _cache.GetTransactions()
+                .OrderByDescending(t => t.IsRecurring)
+                .ThenByDescending(t => t.Date)
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
@@ -85,7 +87,7 @@ public class TransactionsController : Controller
                 return View("Index", SafeViewModel());
             }
 
-            var query = _context.Transactions.Include(t => t.Category).AsQueryable();
+            var query = _cache.GetTransactions().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(q))
                 query = query.Where(t => EF.Functions.Like(t.Description, $"%{q}%"));
@@ -104,7 +106,8 @@ public class TransactionsController : Controller
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
 
             var matches = query
-                .OrderByDescending(t => t.Date)
+                .OrderByDescending(t => t.IsRecurring)
+                .ThenByDescending(t => t.Date)
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
@@ -130,6 +133,7 @@ public class TransactionsController : Controller
             transaction.Currency = selectedCurrency ?? "USD";
 
             _context.Transactions.Add(transaction);
+            _cache.ClearCache();
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Transaction added successfully!";
@@ -147,7 +151,7 @@ public class TransactionsController : Controller
     {
         try
         {
-            var record = _context.Transactions.FirstOrDefault(r => r.Id == id);
+            var record = _cache.GetTransactions().FirstOrDefault(r => r.Id == id);
             if (record is null) return NotFound();
 
             var vm = new EditTransactionViewModel
@@ -178,7 +182,7 @@ public class TransactionsController : Controller
     {
         try
         {
-            var recordToUpdate = _context.Transactions.FirstOrDefault(r => r.Id == id);
+            var recordToUpdate = await _context.Transactions.FindAsync(id);
             if (recordToUpdate is null) return NotFound();
 
             if (ModelState.IsValid)
@@ -188,6 +192,7 @@ public class TransactionsController : Controller
                 recordToUpdate.Amount = newTransaction.Amount;
                 recordToUpdate.Description = newTransaction.Description;
 
+                _cache.ClearCache();
                 await _context.SaveChangesAsync();
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -216,7 +221,7 @@ public class TransactionsController : Controller
     {
         try
         {
-            var record = _context.Transactions.Include(t => t.Category).FirstOrDefault(r => r.Id == id);
+            var record = _cache.GetTransactions().FirstOrDefault(r => r.Id == id);
             if (record is null) return NotFound();
             return PartialView("_DeleteTransaction", record);
         }
@@ -232,10 +237,11 @@ public class TransactionsController : Controller
     {
         try
         {
-            var transaction = _context.Transactions.Find(id);
+            var transaction = await _context.Transactions.FindAsync(id);
             if (transaction is not null)
             {
                 _context.Transactions.Remove(transaction);
+                _cache.ClearCache();
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = $"Successfully deleted transaction #{transaction.Id}!";
             }
