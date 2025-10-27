@@ -19,7 +19,7 @@ public class DbCache
     {
         lock (_lock)
         {
-            if (_transactionCache != null)
+            if (_transactionCache is not null)
                 return _transactionCache;
 
             using var db = _dbFactory();
@@ -32,7 +32,7 @@ public class DbCache
     {
         lock (_lock)
         {
-            if (_categoryCache != null)
+            if (_categoryCache is not null)
                 return _categoryCache;
 
             using var db = _dbFactory();

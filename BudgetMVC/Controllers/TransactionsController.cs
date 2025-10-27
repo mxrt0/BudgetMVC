@@ -22,7 +22,6 @@ public class TransactionsController : Controller
         _cache = cache;
     }
 
-    // Utility fallback
     private TransactionsViewModel SafeViewModel(
         List<Transaction>? transactions = null,
         int currentPage = 1,
@@ -35,7 +34,7 @@ public class TransactionsController : Controller
         }
         catch
         {
-            // DB might be missing — ignore gracefully
+
         }
 
         return new TransactionsViewModel

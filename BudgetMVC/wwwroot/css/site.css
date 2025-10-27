@@ -176,13 +176,13 @@ h1 {
     padding: 0;
 }
 
-.search-container {
+.search-container {   
     display: flex;
     justify-content: center;
     margin: 0.7rem 0;
 }
 
-.search-form {
+.search-form {    
     display: flex;
     align-items: stretch;
     width: 100%;
@@ -207,8 +207,8 @@ h1 {
     outline: none;
     font-size: 1rem;
     padding: 0.4rem 1rem;
-    background: transparent;
     color: #333;
+    border-radius: 100px;
 }
 .search-input::placeholder {
     color: #aaa;
@@ -280,7 +280,7 @@ h1 {
     box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3);
 }
 
-.pagination-container {
+.pagination-container {   
     display: flex;
     justify-content: center;
     margin-top: 20px;
@@ -326,11 +326,11 @@ h1 {
     cursor: default;
 }
 
-/* Recurring row base styling */
+
 .tr-recurring {
-    background-color: rgba(230, 240, 255, 0.7); /* very light blue, soft */
-    font-style: italic; /* subtle visual cue */
-    font-weight: 600; /* slightly bolder */
+    background-color: rgba(230, 240, 255, 0.7); 
+    font-style: italic; 
+    font-weight: 600; 
     transition: background-color 0.2s ease;
     border-bottom: 1px solid;
 }
@@ -338,53 +338,53 @@ h1 {
     font-style: normal;
 }
 
-    /* Left accent border for recurring */
-    .tr-recurring td:first-child {
-        border-left: 4px solid #12fff7; /* matches your gradient header */
-        padding-left: 0.5rem; /* small padding so text doesn't stick to border */
-    }
+    
+.tr-recurring td:first-child {
+    border-left: 4px solid #12fff7;
+    padding-left: 0.5rem;
+}
 
-    /* Hover effect for recurring rows */
-    .tr-recurring:hover {
-        background-color: rgba(240, 248, 255, 0.85); /* slightly darker on hover */
-        cursor: default;
-    }
+    
+.tr-recurring:hover {
+    background-color: rgba(235, 245, 255, 0.8);
+    cursor: default;
+}
 
-    /* Recurring badge */
-    .tr-recurring .badge-recurring {
-        background-color: #12fff7; /* accent color */
-        color: #fff;
-        font-size: 0.75rem;
-        padding: 0.2em 0.4em;
-        border-radius: 0.25rem;
-        margin-left: 0.3rem;
-    }
+    
+.tr-recurring .badge-recurring {
+    background-color: #12fff7; 
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    margin-left: 0.3rem;
+}
 
-    /* Optional: subtle shadow for recurring rows */
-    .tr-recurring td {
-        box-shadow: inset 0 0 0 0 transparent;
-        transition: box-shadow 0.2s ease;
-    }
+    
+.tr-recurring td {
+    box-shadow: inset 0 0 0 0 transparent;
+    transition: box-shadow 0.2s ease;
+}
 
-    .tr-recurring:hover td {
-        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
-    }
+.tr-recurring:hover td {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
 
 .recurring-badge {
-    background-color: rgba(210, 225, 255, 0.9); /* Slightly darker than row bg */
-    color: #0d47a1; /* Deep blue for contrast */
-    font-size: 0.8rem;
-    font-weight: 500;
-    border: 1px solid rgba(180, 200, 255, 0.8);
-    border-radius: 12px;
-    padding: 0.3em 0.6em;
-    vertical-align: middle;
-    box-shadow: 0 0 3px rgba(150, 180, 255, 0.3);
-    transition: background-color 0.2s ease, transform 0.2s ease;
+background-color: rgba(210, 225, 255, 0.9);
+color: #0d47a1;
+font-size: 0.8rem;
+font-weight: 500;
+border: 1px solid rgba(180, 200, 255, 0.8);
+border-radius: 12px;
+padding: 0.3em 0.6em;
+vertical-align: middle;
+box-shadow: 0 0 3px rgba(150, 180, 255, 0.3);
+transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .recurring-badge:hover {
-    transform: translateY(-0.8px);
+transform: translateY(-0.8px);
 }
 
 

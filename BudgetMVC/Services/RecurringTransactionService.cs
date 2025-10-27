@@ -6,7 +6,6 @@ namespace BudgetMVC.Services;
 public class RecurringTransactionService : BackgroundService
 {
     private readonly IServiceProvider _services;
-    private readonly object _lock = new object();
     public RecurringTransactionService(IServiceProvider services)
     {
         _services = services;
